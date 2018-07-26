@@ -72,18 +72,37 @@ class CurrencyRatesRepository
     private $ActualSnapshotId;
 
     /**
+     * @var int
+     */
+    private $request_timeout;
+
+    /**
      * CurrencyRatesRepository constructor.
      *
      * @param CurrencyRatesSqlRepository $repository
+     * @param int                        $request_timeout
      *
      * @throws Exception\MissingKeyException
      * @throws UnknownCurrenciesLetterException
      */
-    public function __construct(CurrencyRatesSqlRepository $repository)
+    public function __construct(CurrencyRatesSqlRepository $repository, int $request_timeout = PHP_INT_MAX)
     {
         $this->repository = $repository;
+        $this->setRequestTimeout($request_timeout);
 
         $this->build();
+    }
+
+    /**
+     * @param int $request_timeout
+     *
+     * @return $this
+     */
+    public function setRequestTimeout(int $request_timeout): CurrencyRatesRepository
+    {
+        $this->request_timeout = $request_timeout;
+
+        return $this;
     }
 
     /**
@@ -295,7 +314,7 @@ class CurrencyRatesRepository
             $this->currencyRatesObjMatrix[$cr->getIncomeCurrencyId()][$cr->getOutcomeCurrencyId()] = $cr;
         }
 
-        foreach ($this->repository->getCurrencyRatesForInnerPS(REQUEST_COURSE_TIMEOUT_MIN) as $v) {
+        foreach ($this->repository->getCurrencyRatesForInnerPS($this->request_timeout) as $v) {
             $cr = new CurrencyRate($v);
 
             if (!isset($this->currencyRatesMatrixForInterval[$cr->getSnapshotId()])) {

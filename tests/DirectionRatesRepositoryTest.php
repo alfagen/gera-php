@@ -9,8 +9,6 @@ use Gera\Exception\DirectionRateNotFound;
 use Gera\Exception\InnerPSMatrixNotFound;
 use PHPUnit\Framework\TestCase;
 
-require_once dirname(dirname(__DIR__)).'/core/cms.php';
-
 /**
  * Class DirectionRatesRepositoryTest
  *
@@ -26,7 +24,18 @@ class DirectionRatesRepositoryTest extends TestCase
      */
     public function test__construct(): DirectionRatesRepository
     {
-        $repo = \cmsCore::getInstance()->getDirectionRateRepository();
+        $host = getenv('MYSQL_HOST') ?: 'localhost';
+        $user = getenv('MYSQL_USER') ?: 'root';
+        $password = getenv('MYSQL_PASSWORD') ?: '';
+        $dbName = getenv('MYSQL_DB') ?: 'test';
+
+        $repo = new DirectionRatesRepository(new DirectionRatesSqlRepository(DBConnectionFactory::getConnection([
+            'adapter' => 'mysql',
+            'host' => $host,
+            'username' => $user,
+            'password' => $password,
+            'dbname' => $dbName
+        ])));
         $this->assertInstanceOf(DirectionRatesRepository::class, $repo);
 
         return $repo;

@@ -6,8 +6,6 @@ namespace Gera;
 
 use PHPUnit\Framework\TestCase;
 
-require_once dirname(dirname(__DIR__)).'/core/cms.php';
-
 /**
  * Class CurrencyRatesSqlRepositoryTest
  *
@@ -22,7 +20,18 @@ class CurrencyRatesSqlRepositoryTest extends TestCase
      */
     public function test__construct(): CurrencyRatesSqlRepository
     {
-        $repo = \cmsCore::getInstance()->getCurrencyRatesSqlRepository();
+        $host = getenv('MYSQL_HOST') ?: 'localhost';
+        $user = getenv('MYSQL_USER') ?: 'root';
+        $password = getenv('MYSQL_PASSWORD') ?: '';
+        $dbName = getenv('MYSQL_DB') ?: 'test';
+
+        $repo = new CurrencyRatesSqlRepository(DBConnectionFactory::getConnection([
+            'adapter' => 'mysql',
+            'host' => $host,
+            'username' => $user,
+            'password' => $password,
+            'dbname' => $dbName
+        ]));
         $this->assertInstanceOf(CurrencyRatesSqlRepository::class, $repo);
 
         return $repo;

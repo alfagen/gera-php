@@ -6,8 +6,6 @@ namespace Gera;
 
 use PHPUnit\Framework\TestCase;
 
-require_once dirname(dirname(__DIR__)).'/core/cms.php';
-
 /**
  * Class DirectionRatesSqlRepositoryTest
  *
@@ -17,11 +15,23 @@ class DirectionRatesSqlRepositoryTest extends TestCase
 {
     /**
      * @return DirectionRatesSqlRepository
+     *
      * @throws \PHPUnit\Framework\Exception
      */
     public function test__construct(): DirectionRatesSqlRepository
     {
-        $repo = \cmsCore::getInstance()->getDirectionRateSqlRepository();
+        $host = getenv('MYSQL_HOST') ?: 'localhost';
+        $user = getenv('MYSQL_USER') ?: 'root';
+        $password = getenv('MYSQL_PASSWORD') ?: '';
+        $dbName = getenv('MYSQL_DB') ?: 'test';
+
+        $repo = new DirectionRatesSqlRepository(DBConnectionFactory::getConnection([
+            'adapter' => 'mysql',
+            'host' => $host,
+            'username' => $user,
+            'password' => $password,
+            'dbname' => $dbName
+        ]));
         $this->assertInstanceOf(DirectionRatesSqlRepository::class, $repo);
 
         return $repo;

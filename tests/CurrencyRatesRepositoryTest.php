@@ -9,8 +9,6 @@ use Gera\Exception\CurrencyRatesNotFound;
 use Gera\Exception\CurrencyRatesMatrixNotFound;
 use PHPUnit\Framework\TestCase;
 
-require_once dirname(dirname(__DIR__)).'/core/cms.php';
-
 /**
  * Class CurrencyRatesRepositoryTest
  *
@@ -27,7 +25,18 @@ class CurrencyRatesRepositoryTest extends TestCase
      */
     public function test__construct(): CurrencyRatesRepository
     {
-        $repo = \cmsCore::getInstance()->getCurrencyRatesRepository();
+        $host = getenv('MYSQL_HOST') ?: 'localhost';
+        $user = getenv('MYSQL_USER') ?: 'root';
+        $password = getenv('MYSQL_PASSWORD') ?: '';
+        $dbName = getenv('MYSQL_DB') ?: 'test';
+
+        $repo = new CurrencyRatesRepository(new CurrencyRatesSqlRepository(DBConnectionFactory::getConnection([
+            'adapter' => 'mysql',
+            'host' => $host,
+            'username' => $user,
+            'password' => $password,
+            'dbname' => $dbName
+        ])), 20);
         $this->assertInstanceOf(CurrencyRatesRepository::class, $repo);
 
         return $repo;
