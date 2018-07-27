@@ -14,23 +14,6 @@ use Gera\Exception\MissingKeyException;
 class RateCalculation
 {
     /**
-     * @see https://github.com/alfagen/kassa-admin/wiki#currencies
-     */
-    const CURRENCIES = [
-        'RUB' => 1,
-        'USD' => 2,
-        'BTC' => 3,
-        'LTC' => 4,
-        'ETH' => 5,
-        'DSH' => 6,
-        'KZT' => 8,
-        'XRP' => 9,
-        'ETC' => 10,
-        'XMR' => 11,
-        'BCH' => 12
-    ];
-
-    /**
      * @var int
      */
     protected $id;
@@ -103,8 +86,8 @@ class RateCalculation
         }
 
         $this->id = (int) $data['id'];
-        $this->income_amount_currency = $data['income_amount_currency'];
-        $this->outcome_amount_currency = $data['outcome_amount_currency'];
+        $this->income_amount_currency = (int) $data['income_amount_currency'];
+        $this->outcome_amount_currency = (int) $data['outcome_amount_currency'];
         $this->income_amount_cents = (float) $data['income_amount_cents'];
         $this->outcome_amount_cents = (float) $data['outcome_amount_cents'];
         $this->direction_rate_id = (int) $data['direction_rate_id'];
@@ -124,7 +107,7 @@ class RateCalculation
      */
     public function getIncomeAmountCurrency(): int
     {
-        return self::CURRENCIES[$this->income_amount_currency];
+        return $this->income_amount_currency;
     }
 
     /**
@@ -132,7 +115,7 @@ class RateCalculation
      */
     public function getOutcomeAmountCurrency(): int
     {
-        return self::CURRENCIES[$this->outcome_amount_currency];
+        return $this->outcome_amount_currency;
     }
 
     /**

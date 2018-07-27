@@ -17,26 +17,14 @@ use Gera\Exception\UnknownCurrenciesLetterException;
 class CurrencyRatesRepository
 {
     /**
-     * @see https://github.com/alfagen/kassa-admin/wiki#currencies
-     */
-    const CURRENCIES = [
-        'RUB' => 1,
-        'USD' => 2,
-        'BTC' => 3,
-        'LTC' => 4,
-        'ETH' => 5,
-        'DSH' => 6,
-        'KZT' => 8,
-        'XRP' => 9,
-        'ETC' => 10,
-        'XMR' => 11,
-        'BCH' => 12
-    ];
-
-    /**
      * @var CurrencyRatesSqlRepository
      */
     private $repository;
+
+    /**
+     * @var CurrencyRepository
+     */
+    private $currency_repository;
 
     /**
      * @var float[][]
@@ -80,15 +68,20 @@ class CurrencyRatesRepository
      * CurrencyRatesRepository constructor.
      *
      * @param CurrencyRatesSqlRepository $repository
+     * @param CurrencyRepository         $currencyRepository
      * @param int                        $request_timeout
      *
      * @throws Exception\MissingKeyException
      * @throws UnknownCurrenciesLetterException
      */
-    public function __construct(CurrencyRatesSqlRepository $repository, int $request_timeout = PHP_INT_MAX)
-    {
+    public function __construct(
+        CurrencyRatesSqlRepository $repository,
+        CurrencyRepository $currencyRepository,
+        int $request_timeout = PHP_INT_MAX
+    ) {
         $this->repository = $repository;
         $this->setRequestTimeout($request_timeout);
+        $this->currency_repository = $currencyRepository;
 
         $this->build();
     }
@@ -233,13 +226,8 @@ class CurrencyRatesRepository
         $currencyRatesObjMatrix = [];
 
         foreach ($result as $v) {
-            if (!isset(self::CURRENCIES[$v['cur_from']])) {
-                throw new UnknownCurrenciesLetterException($v['cur_from']);
-            }
-
-            if (!isset(self::CURRENCIES[$v['cur_to']])) {
-                throw new UnknownCurrenciesLetterException($v['cur_to']);
-            }
+            $this->currency_repository->getByCode($v['cur_from']);
+            $this->currency_repository->getByCode($v['cur_to']);
 
             $cr = new CurrencyRate($v);
 
@@ -284,17 +272,12 @@ class CurrencyRatesRepository
     private function build()
     {
         foreach ($this->repository->getCurrencyRates() as $v) {
-            if (!isset(self::CURRENCIES[$v['cur_from']])) {
-                throw new UnknownCurrenciesLetterException($v['cur_from']);
-            }
-
-            if (!isset(self::CURRENCIES[$v['cur_to']])) {
-                throw new UnknownCurrenciesLetterException($v['cur_to']);
-            }
+            $cur_from = $this->currency_repository->getByCode($v['cur_from']);
+            $cur_to = $this->currency_repository->getByCode($v['cur_to']);
 
             $cr = [
-                self::CURRENCIES[$v['cur_from']],
-                self::CURRENCIES[$v['cur_to']],
+                $cur_from->getLocalId(),
+                $cur_to->getLocalId(),
                 (float) $v['rate_value']
             ];
 
@@ -304,6 +287,8 @@ class CurrencyRatesRepository
 
             $this->currencyRatesMatrix[$cr[0]][$cr[1]] = $cr[2];
             $this->ActualSnapshotId = (int) $v['snapshot_id'];
+            $v['cur_from'] = $cr[0];
+            $v['cur_to'] = $cr[1];
 
             $cr = new CurrencyRate($v);
 
@@ -315,6 +300,9 @@ class CurrencyRatesRepository
         }
 
         foreach ($this->repository->getCurrencyRatesForInnerPS($this->request_timeout) as $v) {
+            $v['cur_from'] = $this->currency_repository->getByCode($v['cur_from']);
+            $v['cur_to'] = $this->currency_repository->getByCode($v['cur_to']);
+
             $cr = new CurrencyRate($v);
 
             if (!isset($this->currencyRatesMatrixForInterval[$cr->getSnapshotId()])) {

@@ -18,7 +18,7 @@ class UnknownCurrenciesLetterException extends \RuntimeException
      * @param int        $code
      * @param \Throwable $previous
      */
-    public function __construct(string $letter, int $code = null, \Throwable $previous = null)
+    public function __construct(string $letter, int $code = 0, \Throwable $previous = null)
     {
         parent::__construct('Unknown letter "'.$letter.'"', $code, $previous);
     }

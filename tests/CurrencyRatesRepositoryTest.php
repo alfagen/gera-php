@@ -8,6 +8,7 @@ use Gera\DataObject\CurrencyRate;
 use Gera\Exception\CurrencyRatesNotFound;
 use Gera\Exception\CurrencyRatesMatrixNotFound;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class CurrencyRatesRepositoryTest
@@ -22,6 +23,7 @@ class CurrencyRatesRepositoryTest extends TestCase
      * @throws Exception\MissingKeyException
      * @throws Exception\UnknownCurrenciesLetterException
      * @throws \PHPUnit\Framework\Exception
+     * @throws \Symfony\Component\Yaml\Exception\ParseException
      */
     public function test__construct(): CurrencyRatesRepository
     {
@@ -30,13 +32,17 @@ class CurrencyRatesRepositoryTest extends TestCase
         $password = getenv('MYSQL_PASSWORD') ?: '';
         $dbName = getenv('MYSQL_DB') ?: 'test';
 
-        $repo = new CurrencyRatesRepository(new CurrencyRatesSqlRepository(DBConnectionFactory::getConnection([
-            'adapter' => 'mysql',
-            'host' => $host,
-            'username' => $user,
-            'password' => $password,
-            'dbname' => $dbName
-        ])), 20);
+        $repo = new CurrencyRatesRepository(
+            new CurrencyRatesSqlRepository(DBConnectionFactory::getConnection([
+                'adapter' => 'mysql',
+                'host' => $host,
+                'username' => $user,
+                'password' => $password,
+                'dbname' => $dbName
+            ])),
+            new CurrencyRepository(Yaml::parse(file_get_contents(__DIR__.'/currencies.yml'))),
+            20
+        );
         $this->assertInstanceOf(CurrencyRatesRepository::class, $repo);
 
         return $repo;

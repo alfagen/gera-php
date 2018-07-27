@@ -14,23 +14,6 @@ use Gera\Exception\MissingKeyException;
 class CurrencyRate
 {
     /**
-     * @see https://github.com/alfagen/kassa-admin/wiki#currencies
-     */
-    const CURRENCIES = [
-        'RUB' => 1,
-        'USD' => 2,
-        'BTC' => 3,
-        'LTC' => 4,
-        'ETH' => 5,
-        'DSH' => 6,
-        'KZT' => 8,
-        'XRP' => 9,
-        'ETC' => 10,
-        'XMR' => 11,
-        'BCH' => 12
-    ];
-
-    /**
      * @var int
      */
     protected $id;
@@ -94,8 +77,8 @@ class CurrencyRate
         }
 
         $this->id = (int) $data['id'];
-        $this->typecy_from = self::CURRENCIES[$data['cur_from']];
-        $this->typecy_to = self::CURRENCIES[$data['cur_to']];
+        $this->typecy_from = (int) $data['cur_from'];
+        $this->typecy_to = (int) $data['cur_to'];
         $this->rate_value = (float) $data['rate_value'];
         $this->snapshot_id = (int) $data['snapshot_id'];
         $this->created_at = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['created_at']);
@@ -127,6 +110,7 @@ class CurrencyRate
 
     /**
      * курс
+     *
      * @return float
      */
     public function getRateValue(): float

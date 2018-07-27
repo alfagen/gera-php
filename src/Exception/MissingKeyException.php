@@ -20,6 +20,6 @@ class MissingKeyException extends \RuntimeException
      */
     public function __construct(string $key, int $code = 0, \Throwable $previous = null)
     {
-        parent::__construct('Array not contain '.$key.' key', $code, $previous);
+        parent::__construct('Array not contain "'.$key.'"" key', $code, $previous);
     }
 }

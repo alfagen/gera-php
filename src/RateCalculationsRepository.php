@@ -15,35 +15,25 @@ use Gera\Exception\RateCalculationNotFound;
 class RateCalculationsRepository
 {
     /**
-     * @see https://github.com/alfagen/kassa-admin/wiki#currencies
-     */
-    const CURRENCIES = [
-        'RUB' => 1,
-        'USD' => 2,
-        'BTC' => 3,
-        'LTC' => 4,
-        'ETH' => 5,
-        'DSH' => 6,
-        'KZT' => 8,
-        'XRP' => 9,
-        'ETC' => 10,
-        'XMR' => 11,
-        'BCH' => 12
-    ];
-
-    /**
      * @var RateCalculationsSqlRepository
      */
     private $repository;
 
     /**
+     * @var CurrencyRepository
+     */
+    private $currency_repository;
+
+    /**
      * RateCalculationsRepository constructor.
      *
      * @param RateCalculationsSqlRepository $repository
+     * @param CurrencyRepository            $currencyRepository
      */
-    public function __construct(RateCalculationsSqlRepository $repository)
+    public function __construct(RateCalculationsSqlRepository $repository, CurrencyRepository $currencyRepository)
     {
         $this->repository = $repository;
+        $this->currency_repository = $currencyRepository;
     }
 
     /**
@@ -54,6 +44,7 @@ class RateCalculationsRepository
      * @return RateCalculation
      *
      * @throws Exception\MissingKeyException
+     * @throws Exception\UnknownCurrenciesLetterException
      * @throws RateCalculationNotFound
      */
     public function getRateCalculationByRateCalculationId(int $rate_calculation_id): RateCalculation
@@ -63,6 +54,9 @@ class RateCalculationsRepository
         if (!$result) {
             throw new RateCalculationNotFound($rate_calculation_id);
         }
+
+        $result['income_amount_currency'] = $this->currency_repository->getByCode($result['income_amount_currency']);
+        $result['outcome_amount_currency'] = $this->currency_repository->getByCode($result['outcome_amount_currency']);
 
         return new RateCalculation($result);
     }
