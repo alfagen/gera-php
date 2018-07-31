@@ -226,8 +226,8 @@ class CurrencyRatesRepository
         $currencyRatesObjMatrix = [];
 
         foreach ($result as $v) {
-            $this->currency_repository->getByCode($v['cur_from']);
-            $this->currency_repository->getByCode($v['cur_to']);
+            $v['cur_from'] = $this->currency_repository->getByCode($v['cur_from'])->getLocalId();
+            $v['cur_to'] = $this->currency_repository->getByCode($v['cur_to'])->getLocalId();
 
             $cr = new CurrencyRate($v);
 
@@ -300,8 +300,8 @@ class CurrencyRatesRepository
         }
 
         foreach ($this->repository->getCurrencyRatesForInnerPS($this->request_timeout) as $v) {
-            $v['cur_from'] = $this->currency_repository->getByCode($v['cur_from']);
-            $v['cur_to'] = $this->currency_repository->getByCode($v['cur_to']);
+            $v['cur_from'] = $this->currency_repository->getByCode($v['cur_from'])->getLocalId();
+            $v['cur_to'] = $this->currency_repository->getByCode($v['cur_to'])->getLocalId();
 
             $cr = new CurrencyRate($v);
 

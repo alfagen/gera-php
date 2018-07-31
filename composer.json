@@ -2,7 +2,7 @@
     "name": "alfagen/gera-php",
     "description": "PHP library from work with Alfa Gera",
     "type": "library",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "config": {
         "platform": {
             "php": "7.0.3"
